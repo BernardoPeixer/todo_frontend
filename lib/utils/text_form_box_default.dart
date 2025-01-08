@@ -17,6 +17,8 @@ class TextFormBoxDefault extends StatelessWidget {
     this.header,
     this.placeholder,
     this.maxLength,
+    this.autoFocus,
+    this.enabled,
   });
 
   /// Text controller
@@ -42,6 +44,12 @@ class TextFormBoxDefault extends StatelessWidget {
 
   /// Form box max length
   final int? maxLength;
+
+  /// Form box has auto focus
+  final bool? autoFocus;
+
+  /// Form box is enabled
+  final bool? enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +77,10 @@ class TextFormBoxDefault extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: PanelColors.littleGrey, width: 1.5),
           ),
-          unfocusedColor: null,
-          highlightColor: Colors.transparent,
+          autofocus: autoFocus ?? false,
+          unfocusedColor: Colors.transparent,
+          highlightColor: Colors.blue,
+          enabled: enabled ?? true,
           style: GoogleFonts.roboto(
             fontSize: 16,
           ),

@@ -60,6 +60,7 @@ class ContentDialogDefault extends StatelessWidget {
                 fontColor: Colors.black,
                 icon: FluentIcons.cancel,
                 iconInLeft: true,
+                buttonPadding: const EdgeInsets.all(6),
               ),
             ),
         ],

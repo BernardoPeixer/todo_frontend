@@ -1,18 +1,16 @@
 import 'package:fluent_ui/fluent_ui.dart';
-
-import '../../../home_page/layers/data/dto/board_dto.dart';
+import '../../layers/data/dto/board_dto.dart';
 import '../../layers/data/dto/task_dto.dart';
 import '../../layers/data/dto/task_list_dto.dart';
 import '../../layers/data/dto/task_list_positions_dto.dart';
-import '../../layers/domain/entities/task_list_entity.dart';
+import '../../layers/data/dto/task_postition_dto.dart';
 import '../../layers/domain/usecases/board_page_usecase.dart';
 
 /// Class to state management board page
 class BoardPageState extends ChangeNotifier {
   /// Constructor
-  BoardPageState({required int boardId, required boardPageUseCase})
-      : _boardPageUsecase = boardPageUseCase,
-        _boardId = boardId {
+  BoardPageState({required boardPageUseCase})
+      : _boardPageUsecase = boardPageUseCase {
     initScreen();
   }
 
@@ -24,13 +22,13 @@ class BoardPageState extends ChangeNotifier {
   BoardDto? _boardDto;
 
   /// Board id
-  final int _boardId;
+  int? _boardId;
 
   /// Bool is loading
   bool _isLoading = false;
 
-  /// Task list
-  final taskList = <TaskListEntity>[];
+  /// Board list
+  final _boardsList = <BoardDto>[];
 
   /// Bool to describe if is adding a new list
   bool isAddingNewList = false;
@@ -38,22 +36,41 @@ class BoardPageState extends ChangeNotifier {
   /// Bool to describe if is adding a new card
   bool isAddingNewCard = false;
 
-  /// Add button child
-  Widget? child;
-
   /// Title list controller
   final TextEditingController _listTitleController = TextEditingController();
+
+  /// Title board controller
+  final TextEditingController _boardTitleController = TextEditingController();
+
+  Color _backgroundAddTaskButton = Colors.transparent;
+
+  final ScrollController _scrollController = ScrollController();
 
   /// -------------------------- GETTERS -------------------------------------
 
   /// Getter for the text controller [_listTitleController]
   TextEditingController get listTitleController => _listTitleController;
 
+  /// Getter for the text controller [titleController]
+  TextEditingController get boardTitleController => _boardTitleController;
+
   /// Getter for the bool [_isLoading]
   bool get isLoading => _isLoading;
 
   /// Getter for the board instance [_boardDto]
   BoardDto? get boardDto => _boardDto;
+
+  /// Getter for the color button [_backgroundAddTaskButton]
+  Color get backgroundAddTaskButton => _backgroundAddTaskButton;
+
+  /// Getter for the scroll controller [_scrollController]
+  ScrollController get scrollController => _scrollController;
+
+  /// Getter for the list [_boardsList]
+  List<BoardDto> get boardsList => _boardsList;
+
+  /// Getter for the int [_boardId]
+  int? get boardId => _boardId;
 
   /// ------------------------- SETTERS -------------------------------------
 
@@ -63,11 +80,24 @@ class BoardPageState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Setter for the color [_backgroundAddTaskButton]
+  set backgroundAddTaskButton(Color value) {
+    _backgroundAddTaskButton = value;
+    notifyListeners();
+  }
+
+  /// Setter for the int [_boardId]
+  set boardId(int? value) {
+    _boardId = value;
+    notifyListeners();
+  }
+
   /// ------------------------------- FUNCTIONS -----------------------------
 
   /// Function to init a screen
   Future<void> initScreen() async {
     isLoading = true;
+    await getAllBoards();
     await getBoardDto();
     isLoading = false;
   }
@@ -80,7 +110,7 @@ class BoardPageState extends ChangeNotifier {
   /// Function to get a board instance
   Future<void> getBoardDto() async {
     try {
-      _boardDto = await _boardPageUsecase.getBoardInfo(_boardId);
+      _boardDto = await _boardPageUsecase.getBoardInfo(_boardId ?? 0);
       notifyListeners();
     } on Exception {
       rethrow;
@@ -99,79 +129,70 @@ class BoardPageState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Function to add new task list
-  void addTaskList() {
-    taskList.add(
-      TaskListEntity(name: 'Testeee'),
-    );
-    notifyListeners();
-  }
-
   /// On dragged item task list
-  Future<void> onDraggedList(draggedItem, int index) async {
+  Future<void> onDraggedList(TaskListDto draggedItem, int targetIndex) async {
     final dragIndex = boardDto?.taskListDto?.indexOf(draggedItem);
-    final targetItem = boardDto?.taskListDto?[index];
 
-    if (dragIndex != null && targetItem != null) {
-      boardDto?.taskListDto?[dragIndex] = targetItem;
-      boardDto?.taskListDto?[index] = draggedItem;
+    if (dragIndex != null && dragIndex != targetIndex) {
+      final removedItem = boardDto?.taskListDto?.removeAt(dragIndex);
 
-      notifyListeners();
+      if (removedItem != null) {
+        boardDto?.taskListDto?.insert(targetIndex, removedItem);
+        notifyListeners();
 
-      final taskListPosition = TaskListPositionsDto(
-        draggedItemId: draggedItem.id,
-        targetItemId: targetItem.id,
-        draggedItemPosition: draggedItem.position,
-        targetItemPosition: targetItem.position,
-        boardId: boardDto?.id,
-      );
-      await _boardPageUsecase.changeListTaskPosition(
-        taskListPosition,
-      );
+        try {
+          final taskListPosition = TaskListPositionsDto(
+            draggedItemId: draggedItem.id,
+            targetItemId: boardDto?.taskListDto?[targetIndex].id ?? 0,
+            draggedItemPosition: dragIndex,
+            targetItemPosition: targetIndex,
+            boardId: boardDto?.id,
+          );
+          await _boardPageUsecase.changeListTaskPosition(taskListPosition);
+        } on Exception {
+          rethrow;
+        }
+      }
     }
   }
 
   /// On dragged item task list
   Future<void> onDraggedTask(
-    TaskDto draggedItem,
-    TaskListDto sourceList,
-    TaskListDto targetList,
-    int newPosition,
+    TaskDto task,
+    int listCardLength,
+    int listLength,
   ) async {
-    sourceList.tasksListDto ??= [];
-    targetList.tasksListDto ??= [];
-
-    sourceList.tasksListDto!.remove(draggedItem);
-
-    for (var i = 0; i < sourceList.tasksListDto!.length; i++) {
-      sourceList.tasksListDto![i].position = i;
+    board:
+    for (final item in (_boardDto?.taskListDto ?? [])) {
+      for (var index = 0; index < item.tasksListDto.length; index++) {
+        final it = item.tasksListDto[index];
+        if (it.id != task.id) {
+          continue;
+        }
+        item.tasksListDto.removeAt(index);
+        notifyListeners();
+        break board;
+      }
     }
 
-    draggedItem.position = newPosition;
-    draggedItem.listId = targetList.id;
+    final list = _boardDto?.taskListDto?[listCardLength].tasksListDto ?? [];
 
-    final safePosition = (newPosition < targetList.tasksListDto!.length)
-        ? newPosition
-        : targetList.tasksListDto!.length;
-
-    targetList.tasksListDto!.insert(safePosition, draggedItem);
-
-    for (var i = 0; i < targetList.tasksListDto!.length; i++) {
-      targetList.tasksListDto![i].position = i;
-    }
+    list.insert(listLength, task);
 
     notifyListeners();
-  }
 
-  int calculateNewPosition(TaskDto draggedItem, TaskListDto? targetList) {
-    if (targetList == null || targetList.tasksListDto == null) {
-      return 0;
+    try {
+      final changedTask = TaskPostitionDto(
+        taskId: task.id,
+        newListId: _boardDto?.taskListDto?[listCardLength].id,
+        newPosition: listLength,
+        boardId: task.boardId,
+      );
+
+      await _boardPageUsecase.changeTaskPosition(changedTask);
+    } on Exception {
+      rethrow;
     }
-
-    final listHeight = targetList.tasksListDto!.length;
-    final itemHeight = 100; 
-    
-    return (listHeight * itemHeight) ~/ 2;
   }
 
   /// Function to save a new task list
@@ -205,7 +226,7 @@ class BoardPageState extends ChangeNotifier {
         name: controller.text,
         boardId: _boardDto?.id,
         listId: list.id,
-        position: list.listTasks?.length,
+        position: list.tasksListDto?.length,
       );
 
       if (controller.text.trim().isEmpty) {
@@ -213,6 +234,36 @@ class BoardPageState extends ChangeNotifier {
       }
 
       await _boardPageUsecase.addNewTask(task);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  /// Function to get all boards
+  Future<void> getAllBoards() async {
+    try {
+      final response = await _boardPageUsecase.getAllBoards();
+      _boardsList
+        ..clear()
+        ..addAll(
+          response ?? [],
+        );
+      notifyListeners();
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  /// Function to add a new board
+  Future<void> addNewBoard(BuildContext context) async {
+    try {
+      if ((_boardTitleController.text).trim().isEmpty) {
+        return;
+      }
+      await _boardPageUsecase.addNewBoard(_boardTitleController.text);
+      _boardTitleController.clear();
+      Navigator.of(context).pop();
+      await initScreen();
     } on Exception {
       rethrow;
     }

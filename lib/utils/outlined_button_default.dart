@@ -19,6 +19,9 @@ class OutlinedButtonDefault extends StatelessWidget {
     this.alignment,
     this.textStyle,
     this.fontColor,
+    this.iconSize,
+    this.applyTextScaling,
+    this.borderRadius,
   });
 
   /// Constructor to button with icon
@@ -34,6 +37,9 @@ class OutlinedButtonDefault extends StatelessWidget {
     this.alignment,
     this.textStyle,
     this.fontColor,
+    this.iconSize,
+    this.applyTextScaling,
+    this.borderRadius,
   });
 
   /// Button title
@@ -66,6 +72,15 @@ class OutlinedButtonDefault extends StatelessWidget {
   /// Button text color
   final Color? fontColor;
 
+  /// Button icon size
+  final double? iconSize;
+
+  /// Button apply text scaling
+  final bool? applyTextScaling;
+
+  /// Button apply text scaling
+  final BorderRadiusGeometry? borderRadius;
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -74,7 +89,7 @@ class OutlinedButtonDefault extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: borderRadius ?? BorderRadius.circular(6),
             color: backgroundColor ?? PanelColors.lightBlue,
           ),
           padding: buttonPadding ?? PanelPadding.buttonPadding,
@@ -84,7 +99,9 @@ class OutlinedButtonDefault extends StatelessWidget {
               if (icon != null && (iconInLeft ?? false)) ...[
                 Icon(
                   icon,
+                  applyTextScaling: applyTextScaling ?? true,
                   color: iconColor ?? Colors.white,
+                  size: iconSize,
                 ),
                 Padding(padding: PanelPadding.horizontalItem),
               ],
@@ -104,6 +121,8 @@ class OutlinedButtonDefault extends StatelessWidget {
                 Icon(
                   icon,
                   color: iconColor ?? Colors.white,
+                  size: iconSize,
+                  applyTextScaling: applyTextScaling ?? true,
                 ),
               ],
             ],

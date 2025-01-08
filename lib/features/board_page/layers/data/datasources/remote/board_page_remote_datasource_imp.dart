@@ -9,6 +9,7 @@ import '../../../../../../core/todo_webservice.dart';
 import '../../dto/task_dto.dart';
 import '../../dto/task_list_dto.dart';
 import '../../dto/task_list_positions_dto.dart';
+import '../../dto/task_postition_dto.dart';
 import '../board_page_datasource.dart';
 
 /// Class to make request to external server
@@ -116,7 +117,7 @@ class BoardPageRemoteDatasourceImp extends TodoWebservice
           {
             'name': task.name ?? '',
             'description': task.description ?? '',
-            'position': task.position,
+            'position': task.position ?? 0,
             'status_code': task.statusCode ?? 0,
             'board_id': task.boardId ?? 0,
             'task_list_id': task.listId ?? 0,
@@ -178,10 +179,10 @@ class BoardPageRemoteDatasourceImp extends TodoWebservice
         },
         body: jsonEncode(
           {
-            'dragged_item_id': list.draggedItemId ?? 0,
-            'target_item_id': list.targetItemId ?? 0,
-            'dragged_item_pos': list.draggedItemPosition ?? 0,
-            'target_item_pos': list.targetItemPosition ?? 0,
+            'dragged_list_id': list.draggedItemId ?? 0,
+            'target_list_id': list.targetItemId ?? 0,
+            'dragged_list_pos': list.draggedItemPosition ?? 0,
+            'target_list_pos': list.targetItemPosition ?? 0,
             'board_id': list.boardId ?? 0,
           },
         ),
@@ -193,6 +194,84 @@ class BoardPageRemoteDatasourceImp extends TodoWebservice
       }
 
       logSuccess('Position changed success', uri.path);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> changeTaskPosition(TaskPostitionDto task) async {
+    try {
+      final url = '$path/task/positionUpdate';
+      final uri = Uri.parse(url);
+
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'id': task.taskId ?? 0,
+          'position': task.newPosition ?? 0,
+          'list_id': task.newListId ?? 0,
+          'board_id': task.boardId ?? 0,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        logFail(response, uri.path);
+        throw ApiResponseException(response);
+      }
+
+      logSuccess('Task position changed successfully', uri.path);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> addNewBoard(String boardTitle) async {
+    try {
+      final url = '$path/board/add';
+      final uri = Uri.parse(url);
+
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(
+          {
+            'title': boardTitle,
+          },
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        logFail(response, uri.path);
+        throw ApiResponseException(response);
+      }
+
+      logSuccess('New board added success', uri.path);
+    } on ApiResponseException {
+      throw Exception('Error');
+    }
+  }
+
+  @override
+  Future<List<dynamic>?> getAllBoards() async {
+    try {
+      final url = '$path/board/getAll';
+      final uri = Uri.parse(url);
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode != 200) {
+        logFail(response, uri.path);
+
+        throw ApiResponseException(response);
+      }
+      logSuccess('Get all frames success!', uri.path);
+      return jsonDecode(response.body);
     } on Exception {
       rethrow;
     }

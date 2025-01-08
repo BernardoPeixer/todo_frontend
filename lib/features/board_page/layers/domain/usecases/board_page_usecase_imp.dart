@@ -1,7 +1,8 @@
-import '../../../../home_page/layers/data/dto/board_dto.dart';
+import '../../data/dto/board_dto.dart';
 import '../../data/dto/task_dto.dart';
 import '../../data/dto/task_list_dto.dart';
 import '../../data/dto/task_list_positions_dto.dart';
+import '../../data/dto/task_postition_dto.dart';
 import '../repositories/board_page_repository.dart';
 import 'board_page_usecase.dart';
 
@@ -34,4 +35,15 @@ class BoardPageUsecaseImp implements BoardPageUsecase {
   @override
   Future<void> changeListTaskPosition(TaskListPositionsDto list) =>
       _boardPageRepository.changeListTaskPosition(list);
+
+  @override
+  Future<void> changeTaskPosition(TaskPostitionDto task) =>
+      _boardPageRepository.changeTaskPosition(task);
+
+  @override
+  Future<List<BoardDto>?> getAllBoards() => _boardPageRepository.getAllBoards();
+
+  @override
+  Future<void> addNewBoard(String boardTitle) =>
+      _boardPageRepository.addNewBoard(boardTitle);
 }

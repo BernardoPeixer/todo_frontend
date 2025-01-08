@@ -1,7 +1,8 @@
-import '../../../../home_page/layers/data/dto/board_dto.dart';
+import '../../data/dto/board_dto.dart';
 import '../../data/dto/task_dto.dart';
 import '../../data/dto/task_list_dto.dart';
 import '../../data/dto/task_list_positions_dto.dart';
+import '../../data/dto/task_postition_dto.dart';
 
 /// Class to define a board page contracts
 abstract class BoardPageRepository {
@@ -22,4 +23,13 @@ abstract class BoardPageRepository {
 
   /// Function to change a list task position
   Future<void> changeListTaskPosition(TaskListPositionsDto list);
+
+   /// Function to change a task position
+  Future<void> changeTaskPosition(TaskPostitionDto task);
+
+  /// Function to get all boards
+  Future<List<BoardDto>?> getAllBoards();
+
+  /// Function to get all boards
+  Future<void> addNewBoard(String boardTitle);
 }

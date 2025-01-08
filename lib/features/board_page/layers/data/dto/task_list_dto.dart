@@ -11,13 +11,20 @@ class TaskListDto extends TaskListEntity {
   /// List of tasks dto
   List<TaskDto>? tasksListDto;
 
-  /// Global key
-  final GlobalKey globalKey = GlobalKey();
+  /// Background button color
+  Color? backgroundButtonColor;
+
+  /// Is adding card boolean
+  bool isAddingCard;
+
+  /// Card text controller
+  final TextEditingController cardTitleController;
 
   /// Constructor
   TaskListDto({
     this.position,
     this.isAddingCard = false,
+    this.backgroundButtonColor,
     super.id,
     super.name,
     super.description,
@@ -27,12 +34,6 @@ class TaskListDto extends TaskListEntity {
     TextEditingController? cardTitleController,
   })  : cardTitleController = cardTitleController ?? TextEditingController(),
         tasksListDto = listTasks;
-
-  /// Is adding card boolean
-  bool isAddingCard;
-
-  /// Card text controller
-  final TextEditingController cardTitleController;
 
   /// Function to set a boolean to is adding new card
   void isAddingCardSetBoolean() {
