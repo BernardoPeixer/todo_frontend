@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/style/panel_colors.dart';
 import '../../../../core/style/panel_padding.dart';
-import '../../../../core/style/panel_text_style.dart';
 import '../../../../utils/content_dialog_default.dart';
 import '../../../../utils/outlined_button_default.dart';
 import '../../../../utils/text_form_box_default.dart';
