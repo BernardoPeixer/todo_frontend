@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../layers/data/dto/board_dto.dart';
 import '../../layers/data/dto/task_dto.dart';
 import '../../layers/data/dto/task_list_dto.dart';
@@ -97,9 +98,19 @@ class BoardPageState extends ChangeNotifier {
   /// Function to init a screen
   Future<void> initScreen() async {
     isLoading = true;
+    final pref = await SharedPreferences.getInstance();
     await getAllBoards();
+    _boardId = pref.getInt('board_id');
     await getBoardDto();
     isLoading = false;
+  }
+
+  /// On tap in side bar tile
+  Future<void> onTapSideBar(int boardId) async {
+    _boardId = boardId;
+    await getBoardDto();
+    final pref = await SharedPreferences.getInstance();
+    pref.setInt('board_id', boardId);
   }
 
   /// Function to reload a screen
@@ -210,7 +221,7 @@ class BoardPageState extends ChangeNotifier {
         return;
       }
 
-      await _boardPageUsecase.addNewTaskList(list);
+      await _boardPageUsecase.saveNewTaskList(list);
       _listTitleController.clear();
       notifyListeners();
     } on Exception {
@@ -264,6 +275,26 @@ class BoardPageState extends ChangeNotifier {
       _boardTitleController.clear();
       Navigator.of(context).pop();
       await initScreen();
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  /// Function to deactivate a task
+  Future<void> deactivateTask(TaskDto task) async {
+    try {
+      await _boardPageUsecase.deactivateTask(task);
+      await getBoardDto();
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  /// Function to deactivate a tasklist
+  Future<void> deactivateTaskList(TaskListDto? taskList) async {
+    try {
+      await _boardPageUsecase.deactivateTaskList(taskList);
+      await getBoardDto();
     } on Exception {
       rethrow;
     }

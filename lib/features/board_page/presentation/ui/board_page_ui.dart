@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/style/panel_colors.dart';
 import '../../../../core/style/panel_padding.dart';
 import '../../../../utils/content_dialog_default.dart';
+import '../../../../utils/default_custom_menu.dart';
 import '../../../../utils/outlined_button_default.dart';
 import '../../../../utils/text_form_box_default.dart';
 import '../../layers/data/dto/board_dto.dart';
@@ -339,8 +340,7 @@ class _BoardItem extends StatelessWidget {
     final state = Provider.of<BoardPageState>(context);
     return GestureDetector(
       onTap: () async {
-        state.boardId = boardDto.id;
-        await state.getBoardDto();
+        await state.onTapSideBar(boardDto.id ?? 0);
       },
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -422,14 +422,52 @@ class _ListTasksWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  item?.name ?? '',
-                  style: GoogleFonts.poppins(
-                    textStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item?.name ?? '',
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                    IconButton(
+                      icon: const Icon(FluentIcons.breadcrumb),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return ContentDialogDefault(
+                              boxConstraints: const BoxConstraints(
+                                maxWidth: 400,
+                              ),
+                              actions: [
+                                OutlinedButtonDefault(
+                                  title: 'Arquivar',
+                                  onTap: () async {
+                                    await state.deactivateTaskList(item);
+                                  },
+                                ),
+                                OutlinedButtonDefault(
+                                  title: 'Cancelar',
+                                  backgroundColor: Colors.red,
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                              content: const Text(
+                                  'Ela pode ser recuperada mais tarde'),
+                              title: 'Deseja arquivar a lista?',
+                            );
+                          },
+                        );
+                      },
+                    )
+                  ],
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
@@ -543,8 +581,8 @@ class _TaskItemWidget extends StatelessWidget {
             color: Colors.grey.withOpacity(0.1),
             borderRadius: BorderRadius.circular(6),
           ),
-          width: 300,
-          height: 100,
+          width: 200,
+          height: 50,
         ),
         child: ChangeNotifierProvider.value(
           value: state,
@@ -584,6 +622,7 @@ class _TaskContainer extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
+          width: 280,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             boxShadow: [
@@ -595,7 +634,72 @@ class _TaskContainer extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             color: Colors.white,
           ),
-          child: Text(task.name ?? ''),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: 230,
+                child: Text(
+                  task.name ?? '',
+                ),
+              ),
+              GestureDetector(
+                onTapDown: (event) {
+                  showCustomMenu(
+                    context: context,
+                    event: event,
+                    child: DefaultCustomMenuCard.transparent(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          OutlinedButtonDefault.withIcon(
+                            backgroundColor: Colors.white,
+                            title: 'Arquivar',
+                            onTap: () async {
+                              removeOverlay();
+                              await state.deactivateTask(task);
+                            },
+                            icon: FluentIcons.archive,
+                            fontColor: Colors.black,
+                            iconColor: Colors.black,
+                            iconInLeft: true,
+                            buttonPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 2),
+                          ),
+                          OutlinedButtonDefault.withIcon(
+                            backgroundColor: Colors.white,
+                            title: 'Etiqueta',
+                            onTap: () {
+                              print('click');
+                            },
+                            icon: FluentIcons.ticket,
+                            fontColor: Colors.black,
+                            iconColor: Colors.black,
+                            buttonPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            iconInLeft: true,
+                            borderRadius: BorderRadius.circular(4),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: IconButton(
+                  icon: const Icon(FluentIcons.info),
+                  onPressed: () {},
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

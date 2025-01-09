@@ -11,9 +11,6 @@ abstract class BoardPageDatasource {
   /// Function to get board info
   Future<Map<String, dynamic>?> getBoardInfo(int? boardId);
 
-  /// Function to add new task list
-  Future<void> addNewTaskList(TaskListDto taskList);
-
   /// Function to add new task
   Future<void> addNewTask(TaskDto task);
 
@@ -31,4 +28,11 @@ abstract class BoardPageDatasource {
 
   /// Function to add new board
   Future<void> addNewBoard(String boardTitle);
+
+  /// Funtion to deactivate a task
+  Future<void> deactivateTask(TaskDto task);
+
+  
+  /// Funtion to deactivate a task
+  Future<void> deactivateTaskList(TaskListDto? taskList);
 }

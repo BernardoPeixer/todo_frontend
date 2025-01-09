@@ -12,9 +12,6 @@ abstract class BoardPageUsecase {
   /// Function to get board info
   Future<BoardDto?> getBoardInfo(int? boardId);
 
-  /// Function to add new task list
-  Future<void> addNewTaskList(TaskListDto taskList);
-
   /// Function to add new task
   Future<void> addNewTask(TaskDto task);
 
@@ -32,4 +29,10 @@ abstract class BoardPageUsecase {
 
   /// Function to get all boards
   Future<void> addNewBoard(String boardTitle);
+
+  /// Funtion to deactivate a task
+  Future<void> deactivateTask(TaskDto task);
+  
+  /// Funtion to deactivate a task
+  Future<void> deactivateTaskList(TaskListDto? taskList);
 }
