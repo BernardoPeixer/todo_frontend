@@ -22,10 +22,6 @@ class BoardPageUsecaseImp implements BoardPageUsecase {
       _boardPageRepository.getBoardInfo(boardId);
 
   @override
-  Future<void> addNewTaskList(TaskListDto taskList) =>
-      _boardPageRepository.addNewTaskList(taskList);
-
-  @override
   Future<void> addNewTask(TaskDto task) =>
       _boardPageRepository.addNewTask(task);
 
@@ -46,4 +42,12 @@ class BoardPageUsecaseImp implements BoardPageUsecase {
   @override
   Future<void> addNewBoard(String boardTitle) =>
       _boardPageRepository.addNewBoard(boardTitle);
+
+  @override
+  Future<void> deactivateTask(TaskDto task) =>
+      _boardPageRepository.deactivateTask(task);
+
+  @override
+  Future<void> deactivateTaskList(TaskListDto? taskList) =>
+      _boardPageRepository.deactivateTaskList(taskList);
 }

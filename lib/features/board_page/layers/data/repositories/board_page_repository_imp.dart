@@ -29,10 +29,6 @@ class BoardPageRepositoryImp implements BoardPageRepository {
   }
 
   @override
-  Future<void> addNewTaskList(TaskListDto taskList) =>
-      _boardPageDatasource.addNewTaskList(taskList);
-
-  @override
   Future<void> addNewTask(TaskDto task) =>
       _boardPageDatasource.addNewTask(task);
 
@@ -69,4 +65,12 @@ class BoardPageRepositoryImp implements BoardPageRepository {
   @override
   Future<void> addNewBoard(String boardTitle) =>
       _boardPageDatasource.addNewBoard(boardTitle);
+
+  @override
+  Future<void> deactivateTask(TaskDto task) =>
+      _boardPageDatasource.deactivateTask(task);
+
+  @override
+  Future<void> deactivateTaskList(TaskListDto? taskList) =>
+      _boardPageDatasource.deactivateTaskList(taskList);
 }

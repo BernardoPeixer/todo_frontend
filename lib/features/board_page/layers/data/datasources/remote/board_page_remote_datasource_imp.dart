@@ -70,39 +70,6 @@ class BoardPageRemoteDatasourceImp extends TodoWebservice
   }
 
   @override
-  Future<void> addNewTaskList(TaskListDto taskList) async {
-    try {
-      final url = '$path/taskList/add';
-      final uri = Uri.parse(url);
-
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(
-          {
-            'name': taskList.name,
-            'description': taskList.description,
-            'position': taskList.position,
-            'status_code': taskList.statusCode,
-            'board_id': taskList.boardId,
-          },
-        ),
-      );
-
-      if (response.statusCode != 200) {
-        logFail(response, uri.path);
-        throw ApiResponseException(response);
-      }
-
-      logSuccess('Task list added successfully', uri.path);
-    } on Exception {
-      rethrow;
-    }
-  }
-
-  @override
   Future<void> addNewTask(TaskDto task) async {
     try {
       final url = '$path/task/add';
@@ -272,6 +239,52 @@ class BoardPageRemoteDatasourceImp extends TodoWebservice
       }
       logSuccess('Get all frames success!', uri.path);
       return jsonDecode(response.body);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deactivateTask(TaskDto task) async {
+    try {
+      final url = '$path/task/deactivate/${task.id}';
+      final uri = Uri.parse(url);
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        logFail(response, uri.path);
+        throw ApiResponseException(response);
+      }
+
+      logSuccess('Task deactivate successfully', uri.path);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deactivateTaskList(TaskListDto? taskList) async {
+    try {
+      final url = '$path/taskList/deactivate/${taskList?.id}';
+      final uri = Uri.parse(url);
+
+      final response = await http.delete(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode != 200) {
+        logFail(response, uri.path);
+        throw ApiResponseException(response);
+      }
+
+      logSuccess('Tasklist deactivate successfully', uri.path);
     } on Exception {
       rethrow;
     }
