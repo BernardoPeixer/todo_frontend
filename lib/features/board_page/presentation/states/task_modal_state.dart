@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+import '../../../../core/errors/exceptions/api_response_exception.dart';
 import '../../layers/data/dto/task_dto.dart';
 import '../../layers/domain/usecases/board_page_usecase.dart';
 
@@ -48,7 +49,7 @@ class TaskModalState extends ChangeNotifier {
   }
 
   /// Function to update task description and task name
-  Future<void> updateTask() async {
+  Future<String?> updateTask() async {
     try {
       final task = TaskDto(
         id: _taskDto.id,
@@ -58,8 +59,11 @@ class TaskModalState extends ChangeNotifier {
       );
       await _boardPageUsecase.editTask(task);
       notifyListeners();
+      return null;
+    } on ApiResponseException catch (e) {
+      return e.response.reasonPhrase;
     } on Exception {
-      rethrow;
+      return 'Erro desconhecido';
     }
   }
 }

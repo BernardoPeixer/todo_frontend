@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/errors/exceptions/api_response_exception.dart';
 import '../../layers/data/dto/board_dto.dart';
 import '../../layers/data/dto/task_dto.dart';
 import '../../layers/data/dto/task_list_dto.dart';
@@ -230,7 +231,7 @@ class BoardPageState extends ChangeNotifier {
   }
 
   /// Function to save a task
-  Future<void> saveNewTask(
+  Future<String?> saveNewTask(
       TextEditingController controller, TaskListDto list) async {
     try {
       final task = TaskDto(
@@ -241,12 +242,15 @@ class BoardPageState extends ChangeNotifier {
       );
 
       if (controller.text.trim().isEmpty) {
-        return;
+        return 'Insira um nome para criar uma nova tarefa!';
       }
 
       await _boardPageUsecase.addNewTask(task);
+      return null;
+    } on ApiResponseException catch (e) {
+      return e.response.reasonPhrase;
     } on Exception {
-      rethrow;
+      return 'Erro desconhecido';
     }
   }
 
@@ -281,22 +285,28 @@ class BoardPageState extends ChangeNotifier {
   }
 
   /// Function to deactivate a task
-  Future<void> deactivateTask(TaskDto task) async {
+  Future<String?> deactivateTask(TaskDto task) async {
     try {
       await _boardPageUsecase.deactivateTask(task);
       await getBoardDto();
+      return null;
+    } on ApiResponseException catch (e) {
+      return e.response.reasonPhrase;
     } on Exception {
-      rethrow;
+      return 'Erro desconhecido';
     }
   }
 
   /// Function to deactivate a tasklist
-  Future<void> deactivateTaskList(TaskListDto? taskList) async {
+  Future<String?> deactivateTaskList(TaskListDto? taskList) async {
     try {
       await _boardPageUsecase.deactivateTaskList(taskList);
       await getBoardDto();
+      return null;
+    } on ApiResponseException catch (e) {
+      return e.response.reasonPhrase;
     } on Exception {
-      rethrow;
+      return 'Erro inesperado';
     }
   }
 }

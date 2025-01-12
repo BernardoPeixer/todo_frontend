@@ -7,6 +7,7 @@ import '../../../../core/style/panel_colors.dart';
 import '../../../../core/style/panel_padding.dart';
 import '../../../../utils/content_dialog_default.dart';
 import '../../../../utils/default_custom_menu.dart';
+import '../../../../utils/infobar_default.dart';
 import '../../../../utils/outlined_button_default.dart';
 import '../../../../utils/text_form_box_default.dart';
 import '../../layers/data/dto/board_dto.dart';
@@ -191,9 +192,7 @@ class _PageContent extends StatelessWidget {
                                   size: 16,
                                   applyTextScaling: true,
                                 ),
-                                onPressed: () {
-                                  state.isAddingList();
-                                },
+                                onPressed: state.isAddingList,
                               ),
                             ],
                           ),
@@ -206,9 +205,7 @@ class _PageContent extends StatelessWidget {
                         icon: FluentIcons.add,
                         backgroundColor: Colors.white.withOpacity(0.3),
                         title: 'Adicionar lista',
-                        onTap: () {
-                          state.isAddingList();
-                        },
+                        onTap: state.isAddingList,
                         borderRadius: BorderRadius.circular(10),
                         iconInLeft: true,
                         iconColor: Colors.white,
@@ -448,7 +445,27 @@ class _ListTasksWidget extends StatelessWidget {
                                 OutlinedButtonDefault(
                                   title: 'Arquivar',
                                   onTap: () async {
-                                    await state.deactivateTaskList(item);
+                                    final message =
+                                        await state.deactivateTaskList(item);
+
+                                    Navigator.pop(context);
+
+                                    if (message != null) {
+                                      showInfoBarDefault(
+                                        context: context,
+                                        title: 'Erro!',
+                                        content: message,
+                                        severity: InfoBarSeverity.error,
+                                      );
+                                    }
+
+                                    showInfoBarDefault(
+                                      context: context,
+                                      title: 'Sucesso!',
+                                      content:
+                                          'Lista de tarefas arquivada com sucesso!',
+                                      severity: InfoBarSeverity.success,
+                                    );
                                   },
                                 ),
                                 OutlinedButtonDefault(
@@ -557,9 +574,9 @@ class _TaskItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<BoardPageState>(context);
-    return DragTarget<TaskDto>(onAccept: (details) {
+    return DragTarget<TaskDto>(onAcceptWithDetails: (details) {
       state.onDraggedTask(
-        details,
+        details.data,
         listCardLength,
         listLength,
       );
@@ -657,7 +674,23 @@ class _TaskContainer extends StatelessWidget {
                             title: 'Arquivar',
                             onTap: () async {
                               removeOverlay();
-                              await state.deactivateTask(task);
+                              final message = await state.deactivateTask(task);
+
+                              if (message != null) {
+                                showInfoBarDefault(
+                                  context: context,
+                                  title: 'Erro!',
+                                  content: message,
+                                  severity: InfoBarSeverity.error,
+                                );
+                              }
+
+                              showInfoBarDefault(
+                                context: context,
+                                title: 'Sucesso!',
+                                content: 'Tarefa arquivada com sucesso!',
+                                severity: InfoBarSeverity.success,
+                              );
                             },
                             icon: FluentIcons.archive,
                             fontColor: Colors.black,
@@ -675,9 +708,7 @@ class _TaskContainer extends StatelessWidget {
                           OutlinedButtonDefault.withIcon(
                             backgroundColor: Colors.white,
                             title: 'Etiqueta',
-                            onTap: () {
-                              print('click');
-                            },
+                            onTap: () {},
                             icon: FluentIcons.ticket,
                             fontColor: Colors.black,
                             iconColor: Colors.black,
@@ -747,10 +778,27 @@ class _AddingCardWidget extends StatelessWidget {
               OutlinedButtonDefault(
                 title: 'Adicionar Cartão',
                 onTap: () async {
-                  await state.saveNewTask(
+                  final message = await state.saveNewTask(
                     taskListDto.cardTitleController,
                     taskListDto,
                   );
+
+                  if (message != null) {
+                    showInfoBarDefault(
+                      context: context,
+                      title: 'Erro!',
+                      content: message,
+                      severity: InfoBarSeverity.error,
+                    );
+                  }
+
+                  showInfoBarDefault(
+                    context: context,
+                    title: 'Sucesso!',
+                    content: 'Tarefa adicionada com sucesso!',
+                    severity: InfoBarSeverity.success,
+                  );
+
                   taskListDto.isAddingCardSetBoolean();
                   await state.getBoardDto();
                   state.reloadScreen();
@@ -796,8 +844,8 @@ class _ListTasks extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = Provider.of<BoardPageState>(context);
     return DragTarget<TaskListDto>(
-      onAccept: (details) async {
-        await state.onDraggedList(details, index);
+      onAcceptWithDetails: (details) async {
+        await state.onDraggedList(details.data, index);
       },
       builder: (context, candidateData, rejectedData) {
         return Draggable<TaskListDto>(
@@ -858,8 +906,24 @@ class _BuildTaskInformartionsDialog extends StatelessWidget {
             OutlinedButtonDefault(
               title: 'Salvar',
               onTap: () async {
-                await state.updateTask();
+                final message = await state.updateTask();
                 Navigator.pop(context);
+
+                if (message != null) {
+                  showInfoBarDefault(
+                    context: context,
+                    title: 'Erro!',
+                    content: message,
+                    severity: InfoBarSeverity.error,
+                  );
+                }
+
+                showInfoBarDefault(
+                  context: context,
+                  title: 'Sucesso!',
+                  content: 'Task atualizada com sucesso!',
+                  severity: InfoBarSeverity.success,
+                );
               },
             ),
           ],
